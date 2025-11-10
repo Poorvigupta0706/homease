@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registered Househelps</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h2>Registered Househelps</h2>
+  <div id="helpersContainer"></div>
+
+  <script>
+    async function fetchHelpers() {
+      try {
+        const response = await fetch('http://localhost:5000/api/househelps/');
+        const helpers = await response.json();
+
+        const container = document.getElementById('helpersContainer');
+        container.innerHTML = '';
+
+        if (helpers.length === 0) {
+          container.textContent = 'No househelps registered yet.';
+          return;
+        }
+
+        helpers.forEach(helper => {
+          const helperDiv = document.createElement('div');
+          helperDiv.className = 'helper';
+
+          helperDiv.innerHTML = `
+            <h3>${helper.name}</h3>
+            <p><strong>Location:</strong> ${helper.location}</p>
+            <p><strong>Skills:</strong> ${helper.skills.join(', ')}</p>
+            <img src="${helper.photo}" alt="${helper.name}" style="width: 150px; height: 150px;" />
+          `;
+
+          container.appendChild(helperDiv);
+        });
+      } catch (error) {
+        document.getElementById('helpersContainer').textContent = 'Error fetching househelps.';
+      }
+    }
+
+    // Fetch helpers on page load
+    fetchHelpers();
+  </script>
+</body>
+</html>

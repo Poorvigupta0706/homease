@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book a Worker</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .booking-container {
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .booking-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .booking-container label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    .booking-container input,
+    .booking-container select,
+    .booking-container button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .booking-container button {
+      background-color: #1abc9c;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .booking-container button:hover {
+      background-color: #16a085;
+    }
+
+    .price-display {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="booking-container">
+    <h2>Book a Worker</h2>
+    <form id="bookingForm">
+      <label for="workerType">Select Worker Type</label>
+      <select id="workerType" required>
+        <option value="" disabled selected>Select a worker</option>
+        <option value="cleaner" data-rate="100">Cleaner (₹100/hour)</option>
+        <option value="cook" data-rate="150">Cook (₹150/hour)</option>
+        <option value="babysitter" data-rate="200">Babysitter (₹200/hour)</option>
+      </select>
+
+      <label for="hours">Enter Hours</label>
+      <input type="number" id="hours" placeholder="Enter number of hours" required min="1">
+
+      <div class="price-display" id="priceDisplay">Total Price: ₹0</div>
+
+      <button type="submit">Book Worker</button>
+    </form>
+  </div>
+
+  <script>
+    const workerType = document.getElementById("workerType");
+    const hoursInput = document.getElementById("hours");
+    const priceDisplay = document.getElementById("priceDisplay");
+    const bookingForm = document.getElementById("bookingForm");
+
+    // Update price dynamically
+    function updatePrice() {
+      const selectedWorker = workerType.options[workerType.selectedIndex];
+      const rate = selectedWorker.getAttribute("data-rate");
+      const hours = hoursInput.value;
+
+      if (rate && hours) {
+        const totalPrice = rate * hours;
+        priceDisplay.textContent = `Total Price: ₹${totalPrice}`;
+      } else {
+        priceDisplay.textContent = "Total Price: ₹0";
+      }
+    }
+
+    workerType.addEventListener("change", updatePrice);
+    hoursInput.addEventListener("input", updatePrice);
+
+    // Handle form submission
+    bookingForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const selectedWorker = workerType.options[workerType.selectedIndex].text;
+      const hours = hoursInput.value;
+      const totalPrice = priceDisplay.textContent;
+
+      if (hours && selectedWorker) {
+        alert(`You successfully booked ${selectedWorker} for ${hours} hours.\n${totalPrice}`);
+      } else {
+        alert("Please fill in all fields.");
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HouseHelp Booking</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sidebar {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+    }
+
+    #menuToggle {
+      background-color: #1abc9c;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .menu {
+      display: none;
+      background-color: #34495e;
+      border-radius: 5px;
+      margin-top: 10px;
+      padding: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    .menu a {
+      display: block;
+      padding: 8px 0;
+      color: #ecf0f1;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .menu a:hover {
+      color: #f1c40f;
+    }
+
+    .center-buttons {
+      text-align: center;
+      margin-top: 200px;
+    }
+
+    .home-btn {
+      display: inline-block;
+      margin: 10px;
+      padding: 15px 25px;
+      background-color: #2980b9;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 18px;
+      transition: 0.3s;
+    }
+
+    .home-btn:hover {
+      background-color: #1c5980;
+    }
+
+    #welcomeMessage {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #f3e5ab;
+      text-shadow: 1px 1px 4px black;
+    }
+  </style>
+</head>
+<body class="homepage">
+
+  <!-- Welcome Message -->
+  <div id="welcomeMessage"></div>
+
+  <!-- Sidebar Menu -->
+  <div class="sidebar">
+    <button id="menuToggle">☰</button>
+    <div class="menu" id="menu">
+      <a href="register.html">Register</a>
+      <a href="book.html">Find Help</a>
+      <a href="dashboard.html">My Househelp Heroes</a>
+      <a href="review.html">Leave a Review ⭐</a>
+      <a href="map.html">Help Around Me 📍</a>
+      <a href="#" id="logoutBtn">Logout</a>
+
+    </div>
+  </div>
+
+  <!-- Main Buttons -->
+  <div class="center-buttons" id="buttonContainer">
+    <a href="register.html" class="home-btn">Register</a>
+    <a href="book.html" class="home-btn">Find Help</a>
+    <a href="login.html" class="home-btn" id="loginBtn">Login</a>
+    <a href="dashboard.html" class="home-btn">🧹 Peek into the Help Hub</a>
+    <a href="book_worker.html" class="home-btn">🛠 Book a Worker</a>
+  </div>
+
+  <!-- Sidebar + Auth Script -->
+  <script>
+    const toggleBtn = document.getElementById("menuToggle");
+    const menu = document.getElementById("menu");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const welcomeElement = document.getElementById("welcomeMessage");
+    const loginBtn = document.getElementById("loginBtn");
+  
+    toggleBtn.addEventListener("click", () => {
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    });
+  
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("currentUser");
+      alert("You’ve been logged out.");
+      window.location.href = "login.html";
+    });
+  
+    const currentUser = localStorage.getItem("currentUser");
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+  
+    if (isLoggedIn !== "true" || !currentUser) {
+      alert("Please login first!");
+      window.location.href = "login.html";
+    } else {
+      if (loginBtn) loginBtn.style.display = "none";
+  
+      function updateGreeting() {
+        const now = new Date();
+        const hours = now.getHours();
+        let greeting = "Hello";
+  
+        if (hours >= 5 && hours < 12) greeting = "Good Morning";
+        else if (hours >= 12 && hours < 17) greeting = "Good Afternoon";
+        else if (hours >= 17 && hours < 22) greeting = "Good Evening";
+        else greeting = "Hello Night Owl 🌙";
+  
+        const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+        welcomeElement.textContent = `${greeting}, ${currentUser}! ⏰ ${time}`;
+      }
+  
+      updateGreeting();
+      setInterval(updateGreeting, 60000); // Update every minute
+    }
+  </script>
+  
+</body>
+</html>
