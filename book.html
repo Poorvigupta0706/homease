@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Find and Book Help</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Login protection -->
+  <script>
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      alert("Please login first!");
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <div class="form-container">
+    <h2>Find and Book Help</h2>
+    <form id="searchForm">
+      <input type="text" id="searchLocation" placeholder="Enter Location" required />
+      <input type="text" id="searchSkill" placeholder="Enter Skill (e.g., Cooking)" required />
+      <input type="number" id="hours" placeholder="Enter Hours" required min="1" />
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="results"></div>
+  </div>
+
+  <div class="form-container" id="paymentSection" style="display: none;">
+    <h2>Payment</h2>
+    <p id="workerDetails"></p>
+    <form id="paymentForm">
+      <label for="cardNumber">Card Number</label>
+      <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" required />
+
+      <label for="expiry">Expiry Date</label>
+      <input type="text" id="expiry" placeholder="MM/YY" required />
+
+      <label for="cvv">CVV</label>
+      <input type="text" id="cvv" placeholder="123" required />
+
+      <button type="submit">Pay Now</button>
+    </form>
+  </div>
+
+  <script>
+    // Redirect if not logged in
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      alert("Please login first!");
+      window.location.href = "login.html";
+    }
+
+    // Booking handler
+    function bookHousehelp(helper, hours) {
+      const rate = helper.rate || 100; // Default rate if not provided
+      const totalPrice = hours * rate;
+
+      // Store selected helper and price in localStorage
+      localStorage.setItem("selectedHelper", JSON.stringify(helper));
+      localStorage.setItem("totalPrice", totalPrice);
+
+      // Populate payment section with worker details
+      const workerDetails = document.getElementById("workerDetails");
+      workerDetails.innerHTML = `
+        <strong>Worker:</strong> ${helper.name}<br>
+        <strong>Location:</strong> ${helper.location}<br>
+        <strong>Skills:</strong> ${helper.skills.join(', ')}<br>
+        <strong>Hours:</strong> ${hours}<br>
+        <strong>Total Price:</strong> ₹${totalPrice}
+      `;
+
+      // Show payment section
+      document.getElementById("paymentSection").style.display = "block";
+
+      // Scroll to payment section
+      document.getElementById("paymentSection").scrollIntoView({ behavior: "smooth" });
+    }
+
+    // Payment handler
+    const paymentForm = document.getElementById("paymentForm");
+    paymentForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const selectedHelper = JSON.parse(localStorage.getItem("selectedHelper"));
+      const totalPrice = localStorage.getItem("totalPrice");
+
+      alert(`Payment successful! You booked ${selectedHelper.name} for ₹${totalPrice}.`);
+      window.location.href = "dashboard.html"; // Redirect to dashboard or confirmation page
+    });
+
+    // Search and display results
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("searchForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const location = document.getElementById("searchLocation").value.toLowerCase();
+        const skill = document.getElementById("searchSkill").value.toLowerCase();
+        const hours = document.getElementById("hours").value;
+
+        try {
+          console.log('Fetching househelps...');
+          const response = await fetch('http://localhost:5000/api/househelps/');
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const househelps = await response.json();
+          console.log('Fetched househelps:', househelps);
+
+          const results = document.getElementById("results");
+          results.innerHTML = "";
+
+          const filtered = househelps.filter(h =>
+            h.location.toLowerCase().includes(location) &&
+            h.skills.join(', ').toLowerCase().includes(skill)
+          );
+
+          if (filtered.length === 0) {
+            results.innerHTML = "<p>No matching househelps found.</p>";
+          } else {
+            filtered.forEach((h) => {
+              const card = document.createElement("div");
+              card.className = "househelp-card";
+
+              const photo = h.photo || "https://cdn-icons-png.flaticon.com/512/219/219983.png";
+              const photoTag = `<img src="${photo}" class="avatar-icon" alt="Avatar" />`;
+
+              const rate = h.rate || 100; // Default rate if not provided
+              const totalPrice = rate * hours;
+
+              card.innerHTML = `
+                ${photoTag}
+                <h3>👤 ${h.name}</h3>
+                <p><strong>Location:</strong> ${h.location}</p>
+                <p><strong>Skills:</strong> ${h.skills.join(', ')}</p>
+                <p><strong>Rate:</strong> ₹${rate}/hour</p>
+                <p><strong>Total Price:</strong> ₹${totalPrice}</p>
+                <button onclick='bookHousehelp(${JSON.stringify(h)}, ${hours})'>Book</button>
+              `;
+
+              results.appendChild(card);
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching househelps:', error);
+          alert('Error fetching househelps. Please check your server connection.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
