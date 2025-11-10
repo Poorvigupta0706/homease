@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register as Househelp</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="form-container">
+    <h2>Register as a Househelp</h2>
+    <form id="registerForm">
+      <input type="text" id="name" placeholder="Enter your name" required />
+      <input type="text" id="location" placeholder="Enter your location" required />
+      <input type="text" id="skills" placeholder="Enter your skills (comma separated)" required />
+      <input type="file" id="photo" accept="image/*" required />
+      <input type="text" id="username" placeholder="Create Username" required />
+      <button type="submit">Register</button>
+    </form>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const location = document.getElementById('location').value.trim();
+      const skills = document.getElementById('skills').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const photoInput = document.getElementById('photo');
+
+      // Check if a photo is uploaded
+      if (photoInput.files.length === 0) {
+        document.getElementById('message').textContent = 'Please upload a photo.';
+        document.getElementById('message').style.color = 'red';
+        return;
+      }
+
+      // Read photo as base64
+      const reader = new FileReader();
+      reader.onload = async function () {
+        const photo = reader.result;
+
+        const newHelper = { name, location, skills, photo, username };
+
+        try {
+          // Send data to the backend
+          const response = await fetch('http://localhost:5000/api/househelps/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newHelper),
+          });
+
+          if (!response.ok) {
+            const result = await response.json();
+            throw new Error(result.message || 'Failed to register');
+          }
+
+          const result = await response.json();
+          document.getElementById('message').textContent = result.message;
+          document.getElementById('message').style.color = 'green';
+          document.getElementById('registerForm').reset();
+        } catch (error) {
+          document.getElementById('message').textContent = error.message || 'Error connecting to the server.';
+          document.getElementById('message').style.color = 'red';
+        }
+      };
+
+      reader.readAsDataURL(photoInput.files[0]);
+    });
+  </script>
+</body>
+</html>
